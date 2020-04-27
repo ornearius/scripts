@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+exec > >(awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }') 2>&1
+
+apt-get update
+apt-get install -y foo
+systemctl restart foo.service
+
+# from https://www.joyfulbikeshedding.com/blog/2020-04-26-prefixing-your-commands-or-scripts-with-a-timestamp.html
+#
+# What bizarre magic is this?!?!
+#
+#  A naked exec statement, without a further command given, means: we don't want to actually execute anything, we only want to manipulate some file descriptors (pipes) in the current Bash process.
+#
+# > means: redirect standard output (which now includes standard error) to the given file.
+#
+# >(some command) is a process substitution. It means: create a new pipe, then run some command with its standard input connected to that pipe, then return a filename to that pipe.
+# 
+# So > >(some command) means: redirect standard output to the pipe created by the process substitution.
+# 
+# 2>&1 means: in the current Bash process, redirect standard error to standard output.
